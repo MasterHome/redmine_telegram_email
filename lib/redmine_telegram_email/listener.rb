@@ -2,7 +2,7 @@ require 'httpclient'
 
 class TelegramListener < Redmine::Hook::Listener
 
-  $DEBUG = 0
+  DEBUG = 0
 
 	def redmine_telegram_email_issues_new_after_save(context={})
 		issue = context[:issue]
@@ -46,7 +46,7 @@ class TelegramListener < Redmine::Hook::Listener
 		issue = context[:issue]
 		journal = context[:journal]
 
-		Rails.logger.info("TELEGRAM CONTENT #{context} WATCHERS #{issue.watcher_users} ASSIGNED_TO #{issue.assigned_to} ISSUEAUTHOR #{issue.author}") if $DEBUG == 1
+		Rails.logger.info("TELEGRAM CONTENT #{context} WATCHERS #{issue.watcher_users} ASSIGNED_TO #{issue.assigned_to} ISSUEAUTHOR #{issue.author}") if DEBUG == 1
 
     users = []
     users.push(issue.author)
@@ -71,7 +71,7 @@ class TelegramListener < Redmine::Hook::Listener
 
   def users_processing(users, updater_user, issue, msg, attachment)
     users.each do |user|
-      Rails.logger.info("TELEGRAM USER ARRAY NAME: #{user}") if $DEBUG == 1
+      Rails.logger.info("TELEGRAM USER ARRAY NAME: #{user}") if DEBUG == 1
       next if user.id.to_i == updater_user.id.to_i and Setting.plugin_redmine_telegram_email[:selfupdate_dont_send] == '1'	  
       max_user_id = 0
       telegram_chat_id = 0
@@ -87,7 +87,7 @@ class TelegramListener < Redmine::Hook::Listener
           telegram_disable = telegram_field.value.to_i
         end
       end
-      Rails.logger.info("TELEGRAM CHAT AND DISABLED #{telegram_chat_id} #{telegram_disable}") if $DEBUG == 1
+      Rails.logger.info("TELEGRAM CHAT AND DISABLED #{telegram_chat_id} #{telegram_disable}") if DEBUG == 1
       if telegram_chat_id != 0
         speak msg, telegram_chat_id, attachment
         Rails.logger.info("TELEGRAM SPEAK TO #{telegram_chat_id} #{attachment} #{user.login}")
@@ -100,7 +100,7 @@ class TelegramListener < Redmine::Hook::Listener
   end
 
 	def speak(msg, channel, attachment=nil)
-		Rails.logger.info("TELEGRAM SPEAK\n #{msg}\n => #{channel}") if $DEBUG == 1
+		Rails.logger.info("TELEGRAM SPEAK\n #{msg}\n => #{channel}") if DEBUG == 1
 		token = Setting.plugin_redmine_telegram_email['telegram_bot_token']
 		Rails.logger.info("TELEGRAM TOKEN EMPTY, PLEASE SET IT IN PLUGIN SETTINGS") if token.nil? || token.empty?
 		proxyurl = Setting.plugin_redmine_telegram_email['proxyurl']
@@ -138,8 +138,8 @@ class TelegramListener < Redmine::Hook::Listener
 				client.keep_alive_timeout = 2
 				client.ssl_config.timeout = 2
 				conn = client.post_async(telegram_url, params)
-        Rails.logger.info("TELEGRAM TEXT TO SEND #{params[:text]}") if $DEBUG == 1
-        Rails.logger.info("TELEGRAM ANSWER #{conn.pop.body.read}") if $DEBUG == 1
+        Rails.logger.info("TELEGRAM TEXT TO SEND #{params[:text]}") if DEBUG == 1
+        Rails.logger.info("TELEGRAM ANSWER #{conn.pop.body.read}") if DEBUG == 1
 				Rails.logger.info("TELEGRAM CODE: #{conn.pop.status_code}")
 			rescue Exception => e
 				Rails.logger.warn("TELEGRAM CANNOT CONNECT TO #{telegram_url} RETRY ##{retries}, ERROR #{e}")
@@ -149,7 +149,7 @@ class TelegramListener < Redmine::Hook::Listener
 	end
 
 	def speak_max(msg, channel, attachment=nil)
-		Rails.logger.info("TELEGRAM SPEAK\n #{msg}\n => #{channel}") if $DEBUG == 1
+		Rails.logger.info("TELEGRAM SPEAK\n #{msg}\n => #{channel}") if DEBUG == 1
 		token = Setting.plugin_redmine_telegram_email['max_bot_token']
 		Rails.logger.info("MAX TOKEN EMPTY, PLEASE SET IT IN PLUGIN SETTINGS") if token.nil? || token.empty?
 
@@ -185,8 +185,8 @@ class TelegramListener < Redmine::Hook::Listener
 				client.keep_alive_timeout = 2
 				client.ssl_config.timeout = 2
 				conn = client.post_async(max_url, params, headers)
-        Rails.logger.info("MAX TEXT TO SEND #{params[:text]}") if $DEBUG == 1
-        Rails.logger.info("MAX ANSWER #{conn.pop.body.read}") if $DEBUG == 1
+        Rails.logger.info("MAX TEXT TO SEND #{params[:text]}") if DEBUG == 1
+        Rails.logger.info("MAX ANSWER #{conn.pop.body.read}") if DEBUG == 1
 				Rails.logger.info("MAX CODE: #{conn.pop.status_code}")
 			rescue Exception => e
 				Rails.logger.warn("MAX CANNOT CONNECT TO #{max_url} RETRY ##{retries}, ERROR #{e}")
