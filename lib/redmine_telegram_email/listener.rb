@@ -72,12 +72,16 @@ class TelegramListener < Redmine::Hook::Listener
   def users_processing(users, updater_user, issue, msg, attachment)
     users.each do |user|
       Rails.logger.info("TELEGRAM USER ARRAY NAME: #{user}") if $DEBUG == 1
-      next if user.id.to_i == updater_user.id.to_i and Setting.plugin_redmine_telegram_email[:selfupdate_dont_send] == '1'
+      next if user.id.to_i == updater_user.id.to_i and Setting.plugin_redmine_telegram_email[:selfupdate_dont_send] == '1'	  
+      max_user_id = 0
       telegram_chat_id = 0
       telegram_disable = 0
       user.custom_field_values.each do |telegram_field|
         if telegram_field.custom_field.name.to_s == 'Telegram Channel' and telegram_field.value.to_i != 0
           telegram_chat_id = telegram_field.value.to_i
+        end
+        if telegram_field.custom_field.name.to_s == 'MAX Channel' and telegram_field.value.to_i != 0
+          max_user_id = telegram_field.value.to_i
         end
         if telegram_field.custom_field.name.to_s == 'Telegram disable email'
           telegram_disable = telegram_field.value.to_i
@@ -88,23 +92,37 @@ class TelegramListener < Redmine::Hook::Listener
         speak msg, telegram_chat_id, attachment
         Rails.logger.info("TELEGRAM SPEAK TO #{telegram_chat_id} #{attachment} #{user.login}")
       end
+      if max_user_id != 0
+        speak msg, max_user_id, attachment
+        Rails.logger.info("TELEGRAM SPEAK TO #{telegram_chat_id} #{attachment} #{user.login}")
+      end
     end
   end
 
 	def speak(msg, channel, attachment=nil)
 		Rails.logger.info("TELEGRAM SPEAK\n #{msg}\n => #{channel}") if $DEBUG == 1
 		token = Setting.plugin_redmine_telegram_email['telegram_bot_token']
+		token_max = Setting.plugin_redmine_telegram_email['max_bot_token']
 		Rails.logger.info("TELEGRAM TOKEN EMPTY, PLEASE SET IT IN PLUGIN SETTINGS") if token.nil? || token.empty?
+		Rails.logger.info("MAX TOKEN EMPTY, PLEASE SET IT IN PLUGIN SETTINGS") if token_max.nil? || token_max.empty?
 		proxyurl = Setting.plugin_redmine_telegram_email['proxyurl']
 
 		telegram_url = "https://api.telegram.org/bot#{token}/sendMessage"
+		max_url = "https://platform-api.max.ru/messages?user_id=#{max_user_id}"
 
 		Rails.logger.info("telegram_url #{telegram_url}")
+		Rails.logger.info("max_url #{max_url}")
 
 		params = {}
 		params[:chat_id] = channel if channel
 		params[:parse_mode] = "HTML"
 		params[:disable_web_page_preview] = 1
+		params_max = {}
+		params_max[:parse_mode] = "HTML"
+		params_max[:disable_web_page_preview] = 1
+		headers_max = {}
+		headers_max[:Content-Type] = "application/json"
+		headers_max[:Authorization] = token_max
 
 		if attachment
 			msg = msg + "\r\n"
@@ -115,6 +133,7 @@ class TelegramListener < Redmine::Hook::Listener
 		end
 
 		params[:text] = msg
+		params_max[:text] = msg
 
 		Thread.new do
 			retries = 0
@@ -135,6 +154,25 @@ class TelegramListener < Redmine::Hook::Listener
 				Rails.logger.info("TELEGRAM CODE: #{conn.pop.status_code}")
 			rescue Exception => e
 				Rails.logger.warn("TELEGRAM CANNOT CONNECT TO #{telegram_url} RETRY ##{retries}, ERROR #{e}")
+				retry if (retries += 1) < 5
+			end
+		end
+
+		Thread.new do
+			retries = 0
+			begin
+				client = HTTPClient.new
+				client.connect_timeout = 2
+				client.send_timeout = 2
+				client.receive_timeout = 2
+				client.keep_alive_timeout = 2
+				client.ssl_config.timeout = 2
+				conn = client.post_async(max_url, params_max, headers_max)
+        Rails.logger.info("MAX TEXT TO SEND #{params_max[:text]}") if $DEBUG == 1
+        Rails.logger.info("MAX ANSWER #{conn.pop.body.read}") if $DEBUG == 1
+				Rails.logger.info("MAX CODE: #{conn.pop.status_code}")
+			rescue Exception => e
+				Rails.logger.warn("MAX CANNOT CONNECT TO #{max_url} RETRY ##{retries}, ERROR #{e}")
 				retry if (retries += 1) < 5
 			end
 		end
