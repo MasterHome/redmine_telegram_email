@@ -26,11 +26,11 @@ Redmine::Plugin.register :redmine_telegram_email do
 		:partial => 'settings/telegram_email_settings'
 end
 
-((Rails.version > "5")? ActiveSupport::Reloader : ActionDispatch::Callbacks).to_prepare do
+#((Rails.version > "5")? ActiveSupport::Reloader : ActionDispatch::Callbacks).to_prepare do
 	require_dependency 'issue'
 	unless Issue.included_modules.include? RedmineTelegramEmail::IssuePatch
 		Issue.send(:include, RedmineTelegramEmail::IssuePatch)
 	end
-end
+#end
 
 
