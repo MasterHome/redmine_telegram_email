@@ -77,13 +77,13 @@ class TelegramListener < Redmine::Hook::Listener
       telegram_chat_id = 0
       telegram_disable = 0
       user.custom_field_values.each do |telegram_field|
-        if telegram_field.custom_field.name.to_s == 'Telegram Channel' and telegram_field.value.to_i != 0
+        if telegram_field.custom_field.name.to_s.downcase == 'Telegram Channel' and telegram_field.value.to_i != 0
           telegram_chat_id = telegram_field.value.to_i
         end
-        if telegram_field.custom_field.name.to_s == 'MAX Channel' and telegram_field.value.to_i != 0
+        if telegram_field.custom_field.name.to_s.downcase == 'MAX Channel' and telegram_field.value.to_i != 0
           max_user_id = telegram_field.value.to_i
         end
-        if telegram_field.custom_field.name.to_s == 'Telegram disable email'
+        if telegram_field.custom_field.name.to_s.downcase == 'Telegram disable email'
           telegram_disable = telegram_field.value.to_i
         end
       end
