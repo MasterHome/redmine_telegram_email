@@ -1,11 +1,16 @@
 <pre>
-	Create two <a href="/custom_fields/new?utf8=%E2%9C%93&type=UserCustomField" target="_blank">user custom fields:</a> named <b>Telegram Channel</b>(text) and <b>Telegram disable email</b>(boolean, default no, checkboxes).
+	Create three <a href="/custom_fields/new?utf8=%E2%9C%93&type=UserCustomField" target="_blank">user custom fields:</a> named <b>Telegram Channel</b>(text), <b>MAX Channel</b>(text) and <b>Telegram disable email</b>(boolean, default no, checkboxes).
 	And you can use them into <a href="/my/account" target="_blank">Every user account</a>
 </pre>
 
 <p>
 	<label for="settings_telegram_bot_token">Telegram BOT Token</label>
 	<input type="text" id="settings_telegram_bot_token" size=80 value="<%= settings['telegram_bot_token'] %>" name="settings[telegram_bot_token]" />
+</p>
+
+<p>
+	<label for="settings_max_bot_token">MAX BOT Token</label>
+	<input type="text" id="settings_max_bot_token" size=80 value="<%= settings['max_bot_token'] %>" name="settings[max_bot_token]" />
 </p>
 
 <p>
