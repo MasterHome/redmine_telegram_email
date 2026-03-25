@@ -155,7 +155,6 @@ class TelegramListener < Redmine::Hook::Listener
 
 		max_url = "https://platform-api.max.ru/messages?user_id=#{channel}"
 
-		Rails.logger.info("telegram_url #{telegram_url}")
 		Rails.logger.info("max_url #{max_url}")
 
 		params = {}
