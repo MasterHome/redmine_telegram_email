@@ -77,25 +77,25 @@ class TelegramListener < Redmine::Hook::Listener
 			telegram_chat_id = 0
 			telegram_disable = 0
 			user.custom_field_values.each do |telegram_field|
-			if telegram_field.custom_field.name.to_s.downcase == 'telegram channel' and telegram_field.value.to_i != 0
-				telegram_chat_id = telegram_field.value.to_i
+				if telegram_field.custom_field.name.to_s.downcase == 'telegram channel' and telegram_field.value.to_i != 0
+					telegram_chat_id = telegram_field.value.to_i
+				end
+				if telegram_field.custom_field.name.to_s.downcase == 'max channel' and telegram_field.value.to_i != 0
+					max_user_id = telegram_field.value.to_i
+				end
+				if telegram_field.custom_field.name.to_s.downcase == 'telegram disable email'
+					telegram_disable = telegram_field.value.to_i
+				end
 			end
-			if telegram_field.custom_field.name.to_s.downcase == 'max channel' and telegram_field.value.to_i != 0
-				max_user_id = telegram_field.value.to_i
+			Rails.logger.info("TELEGRAM CHAT AND DISABLED #{telegram_chat_id} #{telegram_disable}") if DEBUG == 1
+			if telegram_chat_id != 0
+				speak msg, telegram_chat_id, attachment
+				Rails.logger.info("TELEGRAM SPEAK TO #{telegram_chat_id} #{attachment} #{user.login}")
 			end
-			if telegram_field.custom_field.name.to_s.downcase == 'telegram disable email'
-				telegram_disable = telegram_field.value.to_i
+			if max_user_id != 0
+				speak_max msg, max_user_id, attachment
+				Rails.logger.info("MAX SPEAK TO #{max_user_id} #{attachment} #{user.login}")
 			end
-		end
-		Rails.logger.info("TELEGRAM CHAT AND DISABLED #{telegram_chat_id} #{telegram_disable}") if DEBUG == 1
-		if telegram_chat_id != 0
-			speak msg, telegram_chat_id, attachment
-			Rails.logger.info("TELEGRAM SPEAK TO #{telegram_chat_id} #{attachment} #{user.login}")
-		end
-		if max_user_id != 0
-			speak_max msg, max_user_id, attachment
-			Rails.logger.info("MAX SPEAK TO #{max_user_id} #{attachment} #{user.login}")
-		end
 		end
 	end
 
@@ -138,10 +138,10 @@ class TelegramListener < Redmine::Hook::Listener
 				client.keep_alive_timeout = 2
 				client.ssl_config.timeout = 2
 				conn = client.post_async(telegram_url, params)
-        Rails.logger.info("TELEGRAM TEXT TO SEND #{params[:text]}") if DEBUG == 1
-        Rails.logger.info("TELEGRAM ANSWER #{conn.pop.body.read}") if DEBUG == 1
+        		Rails.logger.info("TELEGRAM TEXT TO SEND #{params[:text]}") if DEBUG == 1
+        		Rails.logger.info("TELEGRAM ANSWER #{conn.pop.body.read}") if DEBUG == 1
 				Rails.logger.info("TELEGRAM CODE: #{conn.pop.status_code}")
-			rescue Exception => e
+				rescue Exception => e
 				Rails.logger.warn("TELEGRAM CANNOT CONNECT TO #{telegram_url} RETRY ##{retries}, ERROR #{e}")
 				retry if (retries += 1) < 5
 			end
@@ -168,7 +168,7 @@ class TelegramListener < Redmine::Hook::Listener
 			msg = msg + "\r\n"
 			msg = msg + attachment[:text] if attachment[:text]
 			for field_item in attachment[:fields] do
-        msg = msg +"\r\n"+"<b>"+field_item[:title]+":</b> " + escape(field_item[:value])
+				msg = msg +"\r\n"+"<b>"+field_item[:title]+":</b> " + escape(field_item[:value])
 			end
 		end
 
@@ -184,10 +184,10 @@ class TelegramListener < Redmine::Hook::Listener
 				client.keep_alive_timeout = 2
 				client.ssl_config.timeout = 2
 				conn = client.post_async(max_url, params, headers)
-        Rails.logger.info("MAX TEXT TO SEND #{params[:text]}") if DEBUG == 1
-        Rails.logger.info("MAX ANSWER #{conn.pop.body.read}") if DEBUG == 1
+    			Rails.logger.info("MAX TEXT TO SEND #{params[:text]}") if DEBUG == 1
+    			Rails.logger.info("MAX ANSWER #{conn.pop.body.read}") if DEBUG == 1
 				Rails.logger.info("MAX CODE: #{conn.pop.status_code}")
-			rescue Exception => e
+				rescue Exception => e
 				Rails.logger.warn("MAX CANNOT CONNECT TO #{max_url} RETRY ##{retries}, ERROR #{e}")
 				retry if (retries += 1) < 5
 			end
