@@ -1,6 +1,6 @@
 require 'httpclient'
 
-class TelegramListener < Redmine::Hook::Listener
+RedmineTelegramEmail::Listener < Redmine::Hook::Listener
 
   DEBUG = 0
 
