@@ -149,7 +149,7 @@ class TelegramListener < Redmine::Hook::Listener
 	end
 
 	def speak_max(msg, channel, attachment=nil)
-		Rails.logger.info("TELEGRAM SPEAK\n #{msg}\n => #{channel}") if DEBUG == 1
+		Rails.logger.info("MAX SPEAK\n #{msg}\n => #{channel}") if DEBUG == 1
 		token = Setting.plugin_redmine_telegram_email['max_bot_token']
 		Rails.logger.info("MAX TOKEN EMPTY, PLEASE SET IT IN PLUGIN SETTINGS") if token.nil? || token.empty?
 
