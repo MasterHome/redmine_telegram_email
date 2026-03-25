@@ -139,8 +139,8 @@ RedmineTelegramEmail::Listener < Redmine::Hook::Listener
 				client.keep_alive_timeout = 2
 				client.ssl_config.timeout = 2
 				conn = client.post_async(telegram_url, params)
-        		Rails.logger.info("TELEGRAM TEXT TO SEND #{params[:text]}") if DEBUG == 1
-        		Rails.logger.info("TELEGRAM ANSWER #{conn.pop.body.read}") if DEBUG == 1
+				Rails.logger.info("TELEGRAM TEXT TO SEND #{params[:text]}") if DEBUG == 1
+				Rails.logger.info("TELEGRAM ANSWER #{conn.pop.body.read}") if DEBUG == 1
 				Rails.logger.info("TELEGRAM CODE: #{conn.pop.status_code}")
 				rescue Exception => e
 				Rails.logger.warn("TELEGRAM CANNOT CONNECT TO #{telegram_url} RETRY ##{retries}, ERROR #{e}")
@@ -185,8 +185,8 @@ RedmineTelegramEmail::Listener < Redmine::Hook::Listener
 				client.keep_alive_timeout = 2
 				client.ssl_config.timeout = 2
 				conn = client.post_async(max_url, params, headers)
-    			Rails.logger.info("MAX TEXT TO SEND #{params[:text]}") if DEBUG == 1
-    			Rails.logger.info("MAX ANSWER #{conn.pop.body.read}") if DEBUG == 1
+				Rails.logger.info("MAX TEXT TO SEND #{params[:text]}") if DEBUG == 1
+				Rails.logger.info("MAX ANSWER #{conn.pop.body.read}") if DEBUG == 1
 				Rails.logger.info("MAX CODE: #{conn.pop.status_code}")
 				rescue Exception => e
 				Rails.logger.warn("MAX CANNOT CONNECT TO #{max_url} RETRY ##{retries}, ERROR #{e}")
