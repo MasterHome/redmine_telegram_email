@@ -7,11 +7,11 @@ class TelegramListener < Redmine::Hook::Listener
 	def redmine_telegram_email_issues_new_after_save(context={})
 		issue = context[:issue]
 
-    users = []
-    users.push(issue.author)
-    users.push(issue.assigned_to) if issue.assigned_to
+		users = []
+		users.push(issue.author)
+		users.push(issue.assigned_to) if issue.assigned_to
 
-    users = users.uniq
+		users = users.uniq
 
 		msg = "<b>[#{escape issue.project}]</b>\n<a href='#{object_url issue}'>#{escape issue}</a>\n<b>#{escape issue.author}</b> #{l(:field_created_on)}\n"
 		Rails.logger.info("TELEGRAM NEW ISSUE [#{issue.project.name} - #{issue.tracker.name} ##{issue.id}] (#{issue.status.name}) #{issue.subject}")
@@ -38,7 +38,7 @@ class TelegramListener < Redmine::Hook::Listener
 			:short => true
 		} if Setting.plugin_redmine_telegram_email['display_watchers'] == 'yes'
 
-    users_processing users, issue.author, issue, msg, attachment
+		users_processing users, issue.author, issue, msg, attachment
 
 	end
 
@@ -48,56 +48,56 @@ class TelegramListener < Redmine::Hook::Listener
 
 		Rails.logger.info("TELEGRAM CONTENT #{context} WATCHERS #{issue.watcher_users} ASSIGNED_TO #{issue.assigned_to} ISSUEAUTHOR #{issue.author}") if DEBUG == 1
 
-    users = []
-    users.push(issue.author)
-    users.push(issue.assigned_to) if issue.assigned_to
+		users = []
+		users.push(issue.author)
+		users.push(issue.assigned_to) if issue.assigned_to
 
-    issue.watcher_users.each do |watcher|
-      users.push(watcher)
-    end
+		issue.watcher_users.each do |watcher|
+			users.push(watcher)
+		end
 
-    users = users.uniq
+		users = users.uniq
 
-    msg = "<b>[#{escape issue.project}]</b>\n<a href='#{object_url issue}'>#{escape issue}</a>\n<b>#{journal.user.to_s}</b> #{l(:field_updated_on)}"
-    Rails.logger.info("TELEGRAM EDITED ISSUE [#{issue.project.name} - #{issue.tracker.name} ##{issue.id}] (#{issue.status.name}) #{issue.subject}")
+		msg = "<b>[#{escape issue.project}]</b>\n<a href='#{object_url issue}'>#{escape issue}</a>\n<b>#{journal.user.to_s}</b> #{l(:field_updated_on)}"
+		Rails.logger.info("TELEGRAM EDITED ISSUE [#{issue.project.name} - #{issue.tracker.name} ##{issue.id}] (#{issue.status.name}) #{issue.subject}")
 
-    attachment = {}
-    attachment[:text] = escape journal.notes if journal.notes
-    attachment[:fields] = journal.details.map { |d| detail_to_field d }
+		attachment = {}
+		attachment[:text] = escape journal.notes if journal.notes
+		attachment[:fields] = journal.details.map { |d| detail_to_field d }
 
-    users_processing users, journal.user, issue, msg, attachment
+		users_processing users, journal.user, issue, msg, attachment
 
 	end
 
-  def users_processing(users, updater_user, issue, msg, attachment)
-    users.each do |user|
-      Rails.logger.info("TELEGRAM USER ARRAY NAME: #{user}") if DEBUG == 1
-      next if user.id.to_i == updater_user.id.to_i and Setting.plugin_redmine_telegram_email[:selfupdate_dont_send] == '1'	  
-      max_user_id = 0
-      telegram_chat_id = 0
-      telegram_disable = 0
-      user.custom_field_values.each do |telegram_field|
-        if telegram_field.custom_field.name.to_s.downcase == 'telegram channel' and telegram_field.value.to_i != 0
-          telegram_chat_id = telegram_field.value.to_i
-        end
-        if telegram_field.custom_field.name.to_s.downcase == 'max channel' and telegram_field.value.to_i != 0
-          max_user_id = telegram_field.value.to_i
-        end
-        if telegram_field.custom_field.name.to_s.downcase == 'telegram disable email'
-          telegram_disable = telegram_field.value.to_i
-        end
-      end
-      Rails.logger.info("TELEGRAM CHAT AND DISABLED #{telegram_chat_id} #{telegram_disable}") if DEBUG == 1
-      if telegram_chat_id != 0
-        speak msg, telegram_chat_id, attachment
-        Rails.logger.info("TELEGRAM SPEAK TO #{telegram_chat_id} #{attachment} #{user.login}")
-      end
-      if max_user_id != 0
-        speak_max msg, max_user_id, attachment
-        Rails.logger.info("MAX SPEAK TO #{max_user_id} #{attachment} #{user.login}")
-      end
-    end
-  end
+	def users_processing(users, updater_user, issue, msg, attachment)
+		users.each do |user|
+			Rails.logger.info("TELEGRAM USER ARRAY NAME: #{user}") if DEBUG == 1
+			next if user.id.to_i == updater_user.id.to_i and Setting.plugin_redmine_telegram_email[:selfupdate_dont_send] == '1'	  
+			max_user_id = 0
+			telegram_chat_id = 0
+			telegram_disable = 0
+			user.custom_field_values.each do |telegram_field|
+			if telegram_field.custom_field.name.to_s.downcase == 'telegram channel' and telegram_field.value.to_i != 0
+				telegram_chat_id = telegram_field.value.to_i
+			end
+			if telegram_field.custom_field.name.to_s.downcase == 'max channel' and telegram_field.value.to_i != 0
+				max_user_id = telegram_field.value.to_i
+			end
+			if telegram_field.custom_field.name.to_s.downcase == 'telegram disable email'
+				telegram_disable = telegram_field.value.to_i
+			end
+		end
+		Rails.logger.info("TELEGRAM CHAT AND DISABLED #{telegram_chat_id} #{telegram_disable}") if DEBUG == 1
+		if telegram_chat_id != 0
+			speak msg, telegram_chat_id, attachment
+			Rails.logger.info("TELEGRAM SPEAK TO #{telegram_chat_id} #{attachment} #{user.login}")
+		end
+		if max_user_id != 0
+			speak_max msg, max_user_id, attachment
+			Rails.logger.info("MAX SPEAK TO #{max_user_id} #{attachment} #{user.login}")
+		end
+		end
+	end
 
 	def speak(msg, channel, attachment=nil)
 		Rails.logger.info("TELEGRAM SPEAK\n #{msg}\n => #{channel}") if DEBUG == 1
