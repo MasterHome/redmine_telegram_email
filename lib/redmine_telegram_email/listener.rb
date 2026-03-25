@@ -92,6 +92,7 @@ class TelegramListener < Redmine::Hook::Listener
 				speak msg, telegram_chat_id, attachment
 				Rails.logger.info("TELEGRAM SPEAK TO #{telegram_chat_id} #{attachment} #{user.login}")
 			end
+			Rails.logger.info("MAX CHAT #{max_user_id}) if DEBUG == 1
 			if max_user_id != 0
 				speak_max msg, max_user_id, attachment
 				Rails.logger.info("MAX SPEAK TO #{max_user_id} #{attachment} #{user.login}")
