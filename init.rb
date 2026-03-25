@@ -1,6 +1,6 @@
 require 'redmine'
 
-require_dependency 'redmine_telegram_email/listener'
+require File.dirname(__FILE__) + '/lib/redmine_telegram_email/listener'
 
 Redmine::Plugin.register :redmine_telegram_email do
 	name 'Redmine Telegram Email'
