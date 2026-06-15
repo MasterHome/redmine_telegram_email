@@ -183,6 +183,7 @@ class RedmineTelegramEmail::Listener < Redmine::Hook::Listener
                                 client.receive_timeout = 2
                                 client.keep_alive_timeout = 2
                                 client.ssl_config.timeout = 2
+                                client.ssl_config.set_default_paths
                                 conn = client.post_async(max_url, params.to_json, headers)
                                 Rails.logger.info("MAX TEXT TO SEND #{params[:text]}") if DEBUG == 1
                                 Rails.logger.info("MAX ANSWER #{conn.pop.body.read}") if DEBUG == 1
